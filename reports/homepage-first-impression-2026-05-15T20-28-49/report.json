@@ -1,0 +1,134 @@
+{
+  "spec_id": "homepage-first-impression",
+  "spec_description": "Verify that a new user gets a clear, welcoming first impression of the homepage",
+  "timestamp": "2026-05-15T20:28:49.902Z",
+  "duration_ms": 0,
+  "verdict": "fail",
+  "summary": "3 of 8 checks failed. The user experience needs improvement for a new_user.",
+  "checks_total": 8,
+  "checks_passed": 5,
+  "checks_failed": 3,
+  "results": [
+    {
+      "check": {
+        "type": "visual_presence",
+        "selector": ".hero-section",
+        "description": "Hero section is immediately visible",
+        "expected": "Large, prominent hero section above the fold with clear value proposition",
+        "priority": "critical"
+      },
+      "passed": true,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check appears to pass based on simulated analysis.",
+      "evidence": []
+    },
+    {
+      "check": {
+        "type": "visual_hierarchy",
+        "description": "Visual hierarchy guides attention correctly",
+        "expected": "1. Logo/brand is visible but not dominating\n2. Main headline is the most prominent text\n3. Primary CTA button stands out with contrasting color\n4. Supporting text is readable but secondary\n",
+        "priority": "high"
+      },
+      "passed": false,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check failed in simulation. The expected state was not observed.",
+      "evidence": [],
+      "recommendations": [
+        "Consider improving visual hierarchy",
+        "Ensure sufficient contrast ratios",
+        "Test with real users for validation"
+      ]
+    },
+    {
+      "check": {
+        "type": "text_clarity",
+        "selector": "h1, .hero-title",
+        "description": "Main headline is clear and benefit-focused",
+        "expected": "Headline clearly communicates the main benefit, not just a tagline",
+        "priority": "critical"
+      },
+      "passed": true,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check appears to pass based on simulated analysis.",
+      "evidence": []
+    },
+    {
+      "check": {
+        "type": "visual_presence",
+        "selector": ".cta-button, .primary-action",
+        "description": "Primary call-to-action is obvious",
+        "expected": "Single, prominent CTA button with action-oriented text (e.g., 'Get Started', 'Try Free')",
+        "priority": "critical"
+      },
+      "passed": true,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check appears to pass based on simulated analysis.",
+      "evidence": []
+    },
+    {
+      "check": {
+        "type": "visual_flow",
+        "description": "User's eye naturally flows from headline to CTA",
+        "expected": "Clear visual path from headline → supporting text → CTA button",
+        "priority": "high"
+      },
+      "passed": true,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check appears to pass based on simulated analysis.",
+      "evidence": []
+    },
+    {
+      "check": {
+        "type": "cognitive_load",
+        "description": "Page doesn't overwhelm with too much information",
+        "expected": "- No more than 3-4 key messages above the fold\n- Plenty of whitespace\n- No competing CTAs or distractions\n",
+        "priority": "high"
+      },
+      "passed": false,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check failed in simulation. The expected state was not observed.",
+      "evidence": [],
+      "recommendations": [
+        "Consider improving visual hierarchy",
+        "Ensure sufficient contrast ratios",
+        "Test with real users for validation"
+      ]
+    },
+    {
+      "check": {
+        "type": "trust_signals",
+        "description": "Trust indicators are present but not pushy",
+        "expected": "Subtle trust signals like customer logos, testimonials, or security badges",
+        "priority": "medium"
+      },
+      "passed": true,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check appears to pass based on simulated analysis.",
+      "evidence": []
+    },
+    {
+      "check": {
+        "type": "mobile_friendly",
+        "description": "Design appears responsive and mobile-ready",
+        "expected": "Layout uses responsive design patterns, not fixed widths",
+        "priority": "medium"
+      },
+      "passed": false,
+      "confidence": 0.85,
+      "reasoning": "Mock: This check failed in simulation. The expected state was not observed.",
+      "evidence": [],
+      "recommendations": [
+        "Consider improving visual hierarchy",
+        "Ensure sufficient contrast ratios",
+        "Test with real users for validation"
+      ]
+    }
+  ],
+  "evidence": [],
+  "recommendations": [
+    "Focus on failed checks with \"critical\" priority first",
+    "Review visual hierarchy and information architecture",
+    "Consider A/B testing proposed changes",
+    "Validate fixes with real user testing"
+  ]
+}

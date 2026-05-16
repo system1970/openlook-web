@@ -1,0 +1,89 @@
+version: "0.1"
+
+test:
+  id: "example-ux-test"
+  name: "Example UX Test"
+  description: "Describe the intended user experience being tested."
+
+target:
+  url: "http://localhost:3000"
+  viewport:
+    width: 1280
+    height: 720
+  device: "desktop"
+
+persona:
+  name: "First-time user"
+  role: "User evaluating the product"
+  context: "The user is visiting the product for the first time and wants to understand what to do next."
+  knowledge_level: "novice"
+  patience: "medium"
+
+goal:
+  statement: "The user should be able to understand the page and complete the intended action."
+  success_signal: "The intended action is visibly completed or the user reaches a clear success state."
+  max_time_seconds: 90
+
+run:
+  mode: "bob_playwright_mcp"
+  max_steps: 25
+  allowed_actions:
+    - "navigate"
+    - "click"
+    - "type"
+    - "scroll"
+    - "wait"
+    - "observe"
+
+checks:
+  - id: "primary-action-visible"
+    type: "visual"
+    instruction: "Verify that the main call-to-action is visible without confusion."
+    pass_if: "A user can clearly identify the primary action from the recorded browser session."
+    fail_if: "The primary action is hidden, visually weak, mislabeled, or ambiguous."
+    severity: "critical"
+
+  - id: "flow-completes"
+    type: "flow"
+    instruction: "Verify that the user can complete the main goal."
+    pass_if: "The recording shows the user reaching a clear success or completion state."
+    fail_if: "The user gets stuck, loops, encounters an error, or no clear completion state appears."
+    severity: "critical"
+
+  - id: "feedback-clear"
+    type: "interaction"
+    instruction: "Verify that the UI gives clear feedback after user actions."
+    pass_if: "Important clicks, form submissions, or state changes produce visible feedback."
+    fail_if: "The UI appears frozen, silent, misleading, or unclear after important actions."
+    severity: "major"
+
+failure_conditions:
+  - "The page fails to load."
+  - "The user cannot identify the next action."
+  - "The flow ends with an unhandled error."
+  - "The recording or frames are insufficient to evaluate the experience."
+
+evidence:
+  required:
+    - "video_or_frames"
+  optional:
+    - "screenshots"
+    - "dom_snapshots"
+    - "console_logs"
+    - "network_logs"
+    - "observations"
+  capture_policy: "video_first"
+
+verdict:
+  pass_policy: "all_critical_checks_pass"
+  allow_needs_review: true
+
+metadata:
+  owner: ""
+  tags:
+    - "ux"
+    - "visual"
+    - "openlook"
+  notes: ""
+
+# Made with Bob
