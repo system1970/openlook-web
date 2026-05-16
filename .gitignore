@@ -3,6 +3,8 @@ node_modules/
 
 # Build output
 dist/
+website/dist/
+website/node_modules/
 
 # Environment variables
 .env
@@ -40,5 +42,8 @@ bob_sessions/
 # Local-only skills (not for distribution)
 .agents/skills/context7-mcp/
 .agents/skills/mcp-builder/
+
+# Vercel
+.vercel
 
 # Made with Bob

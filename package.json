@@ -12,7 +12,10 @@
     "build": "bun build src/index.ts --outdir dist --target node",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "openlook": "bun run src/index.ts"
+    "openlook": "bun run src/index.ts",
+    "website:dev": "npm run dev --prefix website",
+    "website:build": "npm run build --prefix website",
+    "website:preview": "npm run preview --prefix website"
   },
   "keywords": [
     "visual-testing",
