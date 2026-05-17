@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+type InstallMode = 'agent' | 'manual';
 
 import MotionGraphic from './components/MotionGraphic';
 
@@ -26,7 +27,60 @@ function Code({ children, id }: { children: string; id: string }) {
   );
 }
 
+const SETUP_PROMPT = `Set up OpenLook visual testing in this project. Do the following:
+
+1. Install the OpenLook skill:
+   Run: bunx skills add system1970/openlook-web
+   This places the skill in .agents/skills/openlook/ with the full workflow instructions.
+
+2. Add MCP server configuration:
+   Add both servers to my MCP config (mcp.json or equivalent):
+
+   {
+     "mcpServers": {
+       "openlook": {
+         "command": "bunx",
+         "args": ["-y", "openlook"],
+         "env": { "GEMINI_API_KEY": "<my_key>" }
+       },
+       "playwright": {
+         "command": "bunx",
+         "args": ["-y", "@playwright/mcp@latest", "--caps=devtools"]
+       }
+     }
+   }
+
+3. Add visual testing rules to AGENTS.md:
+   Create or append to the AGENTS.md file in the project root with these rules:
+
+   ## Visual Testing with OpenLook
+
+   This project uses OpenLook for visual unit testing. Visual specs live in .openlook/.
+
+   ### Rules
+
+   - After any UI change, run all visual specs in .openlook/ before marking the task as done.
+   - Use the openlook skill workflow: prepare run > record with Playwright > review with OpenLook.
+   - If a visual check fails, read the recommended fix from the report and apply it. Re-run the spec until it passes.
+   - Never skip visual verification. A component that renders correctly in the DOM can still be visually broken.
+   - Do not commit recordings or reports to git. Only commit .openlook/*.yaml spec files.
+
+   ### Commands
+
+   After any UI work, run this sequence:
+   1. Build: bun run build (or the project's build command)
+   2. Typecheck: bun run typecheck (or tsc --noEmit)
+   3. Visual tests: Read and run all .openlook/*.yaml specs using the openlook skill
+
+4. Create the .openlook/ directory if it doesn't exist:
+   mkdir .openlook
+
+After setup, confirm what was installed and tell me to write my first visual spec.`;
+
 export default function Home() {
+  const [installMode, setInstallMode] = useState<InstallMode>('agent');
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
+
   return (
     <div className="min-h-screen bg-black text-[#e5e5e5] antialiased">
 
@@ -55,12 +109,33 @@ export default function Home() {
             <p className="mt-6 text-[16px] sm:text-[18px] text-[#999] leading-relaxed font-light">
               Write a spec. Record the browser. Gemini judges the visual experience. Your agent gets a verdict and knows exactly what to fix.
             </p>
-            <div className="mt-8 flex gap-4 justify-center md:justify-start">
-              <a href="#install" className="bg-white text-black text-[13px] font-medium px-5 py-2.5 rounded-md hover:bg-[#ddd] transition-colors shadow-lg">
-                Get started
-              </a>
-              <a href="https://github.com/system1970/openlook-web" className="text-[13px] font-medium px-5 py-2.5 rounded-md border border-[#222] text-[#bbb] hover:text-white hover:border-[#444] transition-colors">
-                View source
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center md:justify-start w-full">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(SETUP_PROMPT);
+                  setCopiedPrompt(true);
+                  setTimeout(() => setCopiedPrompt(false), 2000);
+                }}
+                className="bg-white text-black text-[13px] font-medium px-5 py-2.5 rounded-md hover:bg-[#ddd] transition-colors shadow-lg flex items-center justify-center gap-2 min-w-[200px]"
+              >
+                {copiedPrompt ? (
+                  <>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Copied Setup Prompt!
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    Copy Setup Prompt
+                  </>
+                )}
+              </button>
+              <a href="#install" className="text-[13px] font-medium px-5 py-2.5 rounded-md border border-[#222] text-[#bbb] hover:text-white hover:border-[#444] transition-colors flex items-center justify-center gap-2">
+                Manual Setup
               </a>
             </div>
           </div>
@@ -233,28 +308,92 @@ checks:
       {/* Install */}
       <section id="install" className="py-24 px-6">
         <div className="max-w-[960px] mx-auto">
-          <div className="max-w-[520px]">
+          <div className="max-w-[520px] mb-12">
             <h2 className="text-[28px] font-semibold tracking-tight">Install</h2>
             <p className="mt-3 text-[15px] text-[#888] leading-relaxed">
-              Add the OpenLook skill and MCP server to your project.
+              Choose your path: Bootstrap in one-click using a coding agent, or configure the steps manually.
             </p>
           </div>
 
-          <div className="mt-12 space-y-10">
-            {/* Skill install */}
-            <div>
-              <div className="text-[12px] text-[#555] uppercase tracking-wider mb-3">Add the skill</div>
-              <Code id="install-skill">{`bunx skills add system1970/openlook-web`}</Code>
+          <div className="grid md:grid-cols-2 gap-8 items-start">
+            {/* Agent Setup Card */}
+            <div className="bg-[#0c0c0e] border border-[#1a1a1e] rounded-xl p-8 flex flex-col justify-between min-h-[500px] hover:border-[#2a2a30] transition-colors relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/5 rounded-full blur-[64px] pointer-events-none" />
+              <div>
+                <div className="text-[12px] font-mono text-[#a78bfa] tracking-wider uppercase mb-2">Option A — Recommended</div>
+                <h3 className="text-[20px] font-medium text-white">Agent Bootstrap</h3>
+                <p className="mt-3 text-[14px] text-[#777] leading-relaxed">
+                  Paste a single, comprehensive setup prompt into your agent. It will install the openlook skill, register both MCP servers, and write agent visual testing rules to your project root.
+                </p>
+
+                <div className="mt-8 space-y-6">
+                  {[
+                    ['Install OpenLook skill', 'Integrates browser visual testing workflows directly into your agent.'],
+                    ['Configure MCP servers', 'Adds Playwright and OpenLook review tools to the agent environment.'],
+                    ['Write AGENTS.md rules', 'Establishes visual unit testing as a standard for all future agent sessions.'],
+                  ].map(([title, desc]) => (
+                    <div key={title} className="flex gap-3">
+                      <svg width="16" height="16" className="text-purple-400 mt-1 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div>
+                        <div className="text-[13px] font-medium text-white">{title}</div>
+                        <div className="text-[12px] text-[#666] mt-0.5">{desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(SETUP_PROMPT);
+                    setCopiedPrompt(true);
+                    setTimeout(() => setCopiedPrompt(false), 2000);
+                  }}
+                  className="w-full bg-white text-black text-[13px] font-medium py-3 rounded-lg hover:bg-[#ddd] transition-colors flex items-center justify-center gap-2 shadow-lg"
+                >
+                  {copiedPrompt ? (
+                    <>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Copied Agent Prompt!
+                    </>
+                  ) : (
+                    <>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                      </svg>
+                      Copy Agent Setup Prompt
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* MCP config */}
-            <div>
-              <div className="text-[12px] text-[#555] uppercase tracking-wider mb-3">Configure MCP servers</div>
-              <Code id="install-mcp">{`{
+            {/* Manual Setup Card */}
+            <div className="bg-[#0c0c0e] border border-[#1a1a1e] rounded-xl p-8 flex flex-col justify-between min-h-[500px] hover:border-[#2a2a30] transition-colors relative overflow-hidden group">
+              <div>
+                <div className="text-[12px] font-mono text-[#555] tracking-wider uppercase mb-2">Option B — Traditional</div>
+                <h3 className="text-[20px] font-medium text-white">Manual Setup</h3>
+                <p className="mt-3 text-[14px] text-[#777] leading-relaxed">
+                  Run the installation commands, define the required MCP servers in your environment, and write your first visual spec.
+                </p>
+
+                <div className="mt-8 space-y-6">
+                  <div>
+                    <div className="text-[11px] text-[#555] uppercase tracking-wider mb-2 font-mono">1. Add OpenLook skill</div>
+                    <Code id="install-skill-man">{`bunx skills add system1970/openlook-web`}</Code>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-[#555] uppercase tracking-wider mb-2 font-mono">2. Configure MCP servers</div>
+                    <Code id="install-mcp-man">{`{
   "mcpServers": {
     "openlook": {
       "command": "bunx",
-      "args": ["-y", "openlook-mcp"],
+      "args": ["-y", "openlook"],
       "env": { "GEMINI_API_KEY": "your_key" }
     },
     "playwright": {
@@ -263,25 +402,13 @@ checks:
     }
   }
 }`}</Code>
-              <p className="mt-3 text-[12px] text-[#555]">
-                <code className="font-mono">--caps=devtools</code> enables video recording in Playwright MCP.
-              </p>
-            </div>
+                  </div>
+                </div>
+              </div>
 
-            {/* Write spec */}
-            <div>
-              <div className="text-[12px] text-[#555] uppercase tracking-wider mb-3">Write a spec</div>
-              <Code id="install-mkdir">{`mkdir .openlook
-# create .openlook/homepage.yaml with your steps and checks`}</Code>
-            </div>
-
-            {/* Run */}
-            <div>
-              <div className="text-[12px] text-[#555] uppercase tracking-wider mb-3">Run</div>
-              <div className="bg-[#111] border border-[#1a1a1a] rounded-lg px-5 py-4">
-                <p className="text-[14px] text-[#999]">
-                  Tell your agent: <span className="text-white">&ldquo;Run the visual tests&rdquo;</span>
-                </p>
+              <div className="mt-8 flex items-center justify-between text-[12px] text-[#555] border-t border-[#1a1a1e] pt-4">
+                <span>Visual specs live in <code className="font-mono text-[#777]">.openlook/</code></span>
+                <a href="#spec" className="text-[#888] hover:text-white transition-colors underline">View format</a>
               </div>
             </div>
           </div>
