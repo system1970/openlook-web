@@ -116,7 +116,7 @@ export default function Home() {
                   setCopiedPrompt(true);
                   setTimeout(() => setCopiedPrompt(false), 2000);
                 }}
-                className="bg-white text-black text-[13px] font-medium px-5 py-2.5 rounded-md hover:bg-[#ddd] transition-colors shadow-lg flex items-center justify-center gap-2 min-w-[200px]"
+                className="bg-[#111] border border-[#222] text-[#666] text-[13px] font-medium px-5 py-2.5 rounded-md flex items-center justify-center gap-2 min-w-[200px]"
               >
                 {copiedPrompt ? (
                   <>
@@ -134,7 +134,7 @@ export default function Home() {
                   </>
                 )}
               </button>
-              <a href="#install" className="text-[13px] font-medium px-5 py-2.5 rounded-md border border-[#222] text-[#bbb] hover:text-white hover:border-[#444] transition-colors flex items-center justify-center gap-2">
+              <a href="#install" className="bg-[#111] border border-[#222] text-[#666] text-[13px] font-medium px-5 py-2.5 rounded-md flex items-center justify-center gap-2 min-w-[200px]">
                 Manual Setup
               </a>
             </div>
