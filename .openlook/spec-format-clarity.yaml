@@ -12,11 +12,12 @@ steps:
 
 checks:
   - id: field-labels-visible
-    question: Are the field labels ("id", "url", "steps", "checks") clearly visible with high contrast?
-    pass: The labels "id", "url", "steps", and "checks" are rendered in high-contrast white text above their descriptions, making them easy to read.
-    fail: The labels are completely invisible, blank, or extremely faint against the dark background.
+    question: In the columns of the tabular grid located directly below the syntax-highlighted code block, are the headers ("id", "url", "steps", "checks") clearly visible as high-contrast white text?
+    pass: The four header labels "id", "url", "steps", and "checks" are rendered in bright high-contrast white text directly above their description boxes in the lower grid table.
+    fail: The header labels are completely black, invisible, or missing, leaving only the descriptions floating without titles.
 
   - id: grid-layout-spaced
-    question: Is the supporting details grid properly spaced with readable column separation?
-    pass: The columns have generous horizontal separation (e.g. gap-6) so that the labels and descriptions are aligned and easy to read.
-    fail: The columns are squished together, overlapping, or too close due to a gap-0 or space-x negative margin layout.
+    question: In that lower tabular grid, are the columns generous in width with clear horizontal spacing?
+    pass: The columns have a wide, distinct horizontal layout (e.g. gap-6) with readable separation.
+    fail: The columns are completely squished, overlapping, or close together due to layout errors.
+
