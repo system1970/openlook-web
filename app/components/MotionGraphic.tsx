@@ -48,8 +48,8 @@ export default function MotionGraphic() {
         {/* ====================================================
             PHASE 0: SPEC COMPILATION (IDE VIEW)
             ==================================================== */}
-        <div 
-          className="absolute inset-6 flex flex-col justify-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        <div
+          className="absolute inset-6 flex flex-col justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             opacity: phase === 0 ? 1 : 0,
             transform: phase === 0 ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.97)',
@@ -77,8 +77,8 @@ export default function MotionGraphic() {
         {/* ====================================================
             PHASE 1: BROWSER RECORDING & CURSOR TARGETING
             ==================================================== */}
-        <div 
-          className="absolute inset-6 flex flex-col items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        <div
+          className="absolute inset-6 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             opacity: phase === 1 ? 1 : 0,
             transform: phase === 1 ? 'translateY(0) scale(1)' : phase < 1 ? 'translateY(10px) scale(0.97)' : 'translateY(-10px) scale(0.97)',
@@ -136,8 +136,8 @@ export default function MotionGraphic() {
         {/* ====================================================
             PHASE 2: HOLOGRAPHIC SCANNING & GEMINI AUDIT
             ==================================================== */}
-        <div 
-          className="absolute inset-6 flex flex-col items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        <div
+          className="absolute inset-6 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             opacity: phase === 2 ? 1 : 0,
             transform: phase === 2 ? 'translateY(0) scale(1)' : phase < 2 ? 'translateY(10px) scale(0.97)' : 'translateY(-10px) scale(0.97)',
@@ -168,35 +168,35 @@ export default function MotionGraphic() {
         {/* ====================================================
             PHASE 3: VERDICT badge (PRISTINE PASS BADGE)
             ==================================================== */}
-        <div 
-          className="absolute inset-6 flex flex-col items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        <div
+          className="absolute inset-6 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             opacity: phase === 3 ? 1 : 0,
             transform: phase === 3 ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.97)',
             pointerEvents: phase === 3 ? 'auto' : 'none'
           }}
         >
-          {/* Intentional visual regression for the OpenLook demo branch. */}
-          <div 
-            className="w-[85%] bg-neutral-950 border border-red-500/40 rounded-xl p-6 shadow-2xl relative select-none flex flex-col items-center justify-center overflow-hidden"
+          {/* Fixed: Smooth slide-up animation with proper easing */}
+          <div
+            className="w-[85%] bg-neutral-950 border border-emerald-500/40 rounded-xl p-6 shadow-2xl relative select-none flex flex-col items-center justify-center overflow-hidden"
             style={{
-              animation: phase === 3 ? 'verdictSnapIn 0.01s linear forwards' : 'none'
+              animation: phase === 3 ? 'verdictSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none'
             }}
           >
             {/* Subtle Gradient Backlight behind badge */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-red-500/[0.08] to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-emerald-500/[0.08] to-transparent pointer-events-none" />
 
-            {/* Broken state: red failure badge that snaps in instead of easing smoothly. */}
-            <div className="openlook-verdict-badge flex flex-col items-center justify-center border border-red-500/40 bg-red-500/[0.08] text-red-400 px-6 py-4 rounded-xl shadow-[0_8px_32px_rgba(239,68,68,0.12)] mb-4">
-              <span className="text-[9px] uppercase font-mono tracking-widest text-red-500/70 mb-1">Visual Regression Verdict</span>
+            {/* Fixed: Smooth slide-up with scale and ease-out deceleration */}
+            <div className="openlook-verdict-badge flex flex-col items-center justify-center border border-emerald-500/40 bg-emerald-500/[0.08] text-emerald-400 px-6 py-4 rounded-xl shadow-[0_8px_32px_rgba(16,185,129,0.12)] mb-4">
+              <span className="text-[9px] uppercase font-mono tracking-widest text-emerald-500/70 mb-1">Visual Unit Test Verdict</span>
               <div className="text-[19px] font-mono font-medium tracking-tight flex items-center gap-1.5">
-                <span>FAIL</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                <span>PASS</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
             </div>
 
             <div className="text-[11px] text-neutral-500 font-mono text-center max-w-[280px]">
-              Motion artifact detected. Verdict badge snapped into view.
+              All visual checks passed with smooth animations.
             </div>
           </div>
         </div>
@@ -222,11 +222,7 @@ export default function MotionGraphic() {
           100% { top: 85%; opacity: 0; }
         }
         @keyframes verdictSlideIn {
-          from { opacity: 0; transform: translateY(12px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes verdictSnapIn {
-          from { opacity: 0; transform: translateY(0) scale(1); }
+          from { opacity: 0; transform: translateY(20px) scale(0.94); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
