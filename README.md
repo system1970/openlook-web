@@ -265,6 +265,28 @@ bun run dev
 | `GEMINI_API_KEY` | Yes | Google Gemini API key for video analysis |
 | `GEMINI_MODEL` | No | Model override (default: `gemini-2.5-flash`) |
 
+## 🔴 Try the Live Visual Self-Healing Demo!
+
+Experience the power of OpenLook's continuous visual feedback loop in 30 seconds. We have set up two realistic visual bug branches with deliberate UX regressions. You can checkout either branch, ask your coding agent (like IBM Bob) to run the visual checks, and watch it heal the code automatically!
+
+### 🎯 Demo 1: Hero CTA Contrast Bug (`visual-bug-demo`)
+* **The Regression**: The high-contrast white primary **Copy Setup Prompt** CTA is demoted to a low-contrast dark button identical to the secondary button, violating contrast accessibility and visual hierarchy.
+* **How to trigger**:
+  ```bash
+  git checkout visual-bug-demo
+  ```
+* **Prompt for your Agent (IBM Bob)**:
+  > "Run the visual tests in `.openlook/`. Observe the contrast regression in the Hero CTAs, find the styling bug in `app/page.tsx`, and heal it back to pristine high contrast."
+
+### 🎯 Demo 2: Spec Format Grid Visibility Bug (`bug-1`)
+* **The Regression**: The four grid column headers (`id`, `url`, `steps`, `checks`) in the **Spec format** section have been colored to match the dark background exactly, rendering them invisible. The columns are also visually squished together.
+* **How to trigger**:
+  ```bash
+  git checkout bug-1
+  ```
+* **Prompt for your Agent (IBM Bob)**:
+  > "Run the visual test `spec-format-clarity` in `.openlook/`. Identify the invisible grid labels and squished layout under the Spec grid in `app/page.tsx`, and heal it back to high contrast and clean spacing."
+
 ## Built With
 
 - [IBM Bob](https://www.ibm.com/bob) — AI coding agent used to build this project
