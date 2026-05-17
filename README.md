@@ -1,7 +1,7 @@
 # OpenLook
 
 <p align="center">
-  <img src="public/banner.png" alt="OpenLook Banner" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
+  <img src="https://raw.githubusercontent.com/system1970/openlook-web/master/public/banner.png" alt="OpenLook Banner" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
 </p>
 
 **What if your coding agent could see?**
@@ -23,7 +23,7 @@ spec → record → analyze → verdict
 ## How It Works
 
 <p align="center">
-  <img src="public/How_it_works.png" alt="OpenLook Visual Flow Diagram" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
+  <img src="https://raw.githubusercontent.com/system1970/openlook-web/master/public/How_it_works.png" alt="OpenLook Visual Flow Diagram" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
 </p>
 
 <details>
@@ -83,7 +83,7 @@ sequenceDiagram
 ## The Video Self-Healing Loop
 
 <p align="center">
-  <img src="public/Self_healing_loop.png" alt="OpenLook Self-Healing Feedback Loop" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
+  <img src="https://raw.githubusercontent.com/system1970/openlook-web/master/public/Self_healing_loop.png" alt="OpenLook Self-Healing Feedback Loop" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
 </p>
 
 Traditional automated tests check DOM selectors, but they are completely blind to motion, easing, color layout, and UX bugs. OpenLook enables a continuous **self-healing visual feedback loop** where agents detect visual bugs and fix their own UI code automatically.
