@@ -21,7 +21,7 @@ const INLINE_VIDEO_SIZE_LIMIT = 18 * 1024 * 1024; // 18MB
 
 /**
  * Analyze a browser recording using Gemini.
- * Returns mock results if no API key is available.
+ * Requires GEMINI_API_KEY or an explicit API key override.
  */
 export async function analyzeEvidence(
   spec: OpenLookSpec,
@@ -31,17 +31,17 @@ export async function analyzeEvidence(
   const apiKey = apiKeyOverride || process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return createMockAnalysis(spec, evidence);
+    throw new Error(
+      'GEMINI_API_KEY is required for OpenLook video analysis. Add it to the OpenLook MCP server env configuration and restart the MCP server.'
+    );
   }
 
   try {
     return await analyzeWithGemini(spec, evidence, apiKey);
   } catch (error) {
     console.error('Gemini API error:', error);
-    return createMockAnalysis(
-      spec,
-      evidence,
-      `Gemini API Error: ${error instanceof Error ? error.message : String(error)}`
+    throw new Error(
+      `Gemini API error: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }

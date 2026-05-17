@@ -26,59 +26,6 @@ spec → record → analyze → verdict
   <img src="https://raw.githubusercontent.com/system1970/openlook-web/master/public/How_it_works.png" alt="OpenLook Visual Flow Diagram" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
 </p>
 
-<details>
-  <summary>📊 View Raw Master Sequence Diagram Source</summary>
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Dev as Developer
-    participant Agent as Coding Agent
-    participant Code as App Codebase
-    participant PW as Playwright MCP
-    participant OL as OpenLook MCP
-    participant Gemini as Gemini
-
-    Note over Dev,Code: 1. UI change creates a visual regression
-    Dev->>Agent: "Implement the new interaction/theme"
-    Agent->>Code: Edits Next.js UI code
-    Agent->>Code: Typecheck/unit tests pass, but UX may still be wrong
-
-    Note over Agent,OL: 2. OpenLook prepares a deterministic recording run
-    Agent->>OL: openlook_prepare_run(spec)
-    OL-->>Agent: runId, recordingPath, viewport, browser_start_video args
-
-    Note over Agent,PW: 3. Agent records the real browser experience
-    Agent->>PW: browser_start_video(recordingPath, viewport)
-    Agent->>PW: Navigate to target URL
-    PW->>Code: Render app in browser
-    Agent->>PW: Perform spec steps: click, hover, scroll, wait
-    Agent->>PW: browser_stop_video()
-    PW-->>Agent: Saved WebM recording path
-
-    Note over Agent,Gemini: 4. OpenLook evaluates the recording against intent
-    Agent->>OL: openlook_review(spec, recordingPath)
-    OL->>OL: Validate recording exists and is non-empty
-    OL->>Gemini: Send browser recording + visual checks
-    Gemini->>Gemini: Analyze layout, hierarchy, motion, contrast, and task clarity
-    Gemini-->>OL: Structured verdict, failed checks, reasoning, recommended fixes
-    OL-->>Agent: Visual audit report: JSON/Markdown + pass/fail checks
-
-    Note over Agent,Code: 5. Agent repairs the visual regression
-    Agent->>Agent: Interpret failed checks and recommended fixes
-    Agent->>Code: Patch UI code, styles, motion, spacing, or contrast
-
-    Note over Agent,Gemini: 6. Same spec is rerun until the visual check passes
-    Agent->>OL: openlook_prepare_run(spec)
-    OL-->>Agent: New recordingPath and viewport
-    Agent->>PW: Record browser session again
-    Agent->>OL: Re-run Visual Audit
-    OL->>Gemini: Stream New Video WebM
-    Gemini-->>OL: Verdict: PASS
-    OL-->>Agent: Report confirms visual regression is fixed
-    Agent-->>Dev: Summary, report path, and changed files
-```
-</details>
 
 ## The Video Self-Healing Loop
 
@@ -108,13 +55,15 @@ Add OpenLook and Playwright to your MCP config:
     "openlook": {
       "command": "npx",
       "args": ["-y", "openlook"],
+      "cwd": "/absolute/path/to/your/project",
       "env": {
         "GEMINI_API_KEY": "your_key_here"
       }
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--caps=devtools"]
+      "args": ["-y", "@playwright/mcp@latest", "--caps=devtools"],
+      "cwd": "/absolute/path/to/your/project"
     }
   }
 }
@@ -320,7 +269,7 @@ bun run dev
 
 - [IBM Bob](https://www.ibm.com/bob) — AI coding agent used to build this project
 - [Google Gemini](https://ai.google.dev/) — multimodal AI for video analysis
-- [Playwright MCP](https://github.com/nichochar/playwright-mcp) — browser automation and recording
+- [Playwright MCP](https://playwright.dev/docs/mcp) - browser automation and recording
 - [Model Context Protocol](https://modelcontextprotocol.io/) — the standard connecting AI to tools
 
 ## License
