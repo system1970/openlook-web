@@ -176,27 +176,27 @@ export default function MotionGraphic() {
             pointerEvents: phase === 3 ? 'auto' : 'none'
           }}
         >
-          {/* High-Contrast Slide-Up Verdict Card */}
+          {/* Intentional visual regression for the OpenLook demo branch. */}
           <div 
-            className="w-[85%] bg-neutral-950 border border-neutral-900 rounded-xl p-6 shadow-2xl relative select-none flex flex-col items-center justify-center overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="w-[85%] bg-neutral-950 border border-red-500/40 rounded-xl p-6 shadow-2xl relative select-none flex flex-col items-center justify-center overflow-hidden"
             style={{
-              animation: phase === 3 ? 'verdictSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none'
+              animation: phase === 3 ? 'verdictSnapIn 0.01s linear forwards' : 'none'
             }}
           >
             {/* Subtle Gradient Backlight behind badge */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-emerald-500/[0.02] to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-red-500/[0.08] to-transparent pointer-events-none" />
 
-            {/* The Verdict Badge (Pristine state is elegant Green PASS badge) */}
-            <div className="openlook-verdict-badge flex flex-col items-center justify-center border border-emerald-500/10 bg-emerald-500/[0.02] text-emerald-400 px-6 py-4 rounded-xl shadow-[0_8px_32px_rgba(16,185,129,0.04)] mb-4">
-              <span className="text-[9px] uppercase font-mono tracking-widest text-emerald-500/60 mb-1">Visual Regression Verdict</span>
+            {/* Broken state: red failure badge that snaps in instead of easing smoothly. */}
+            <div className="openlook-verdict-badge flex flex-col items-center justify-center border border-red-500/40 bg-red-500/[0.08] text-red-400 px-6 py-4 rounded-xl shadow-[0_8px_32px_rgba(239,68,68,0.12)] mb-4">
+              <span className="text-[9px] uppercase font-mono tracking-widest text-red-500/70 mb-1">Visual Regression Verdict</span>
               <div className="text-[19px] font-mono font-medium tracking-tight flex items-center gap-1.5">
-                <span>PASS</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>FAIL</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
               </div>
             </div>
 
             <div className="text-[11px] text-neutral-500 font-mono text-center max-w-[280px]">
-              No motion artifacts, layout shifts, or contrast failures detected.
+              Motion artifact detected. Verdict badge snapped into view.
             </div>
           </div>
         </div>
@@ -223,6 +223,10 @@ export default function MotionGraphic() {
         }
         @keyframes verdictSlideIn {
           from { opacity: 0; transform: translateY(12px) scale(0.96); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes verdictSnapIn {
+          from { opacity: 0; transform: translateY(0) scale(1); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
