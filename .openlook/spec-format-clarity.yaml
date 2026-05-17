@@ -1,0 +1,22 @@
+id: spec-format-clarity
+url: http://localhost:3000/#spec
+
+viewport:
+  width: 1440
+  height: 900
+
+steps:
+  - Navigate to http://localhost:3000/#spec
+  - Scroll down below the "Spec format" code snippet to observe the supporting fields grid
+  - Verify that the four field names ("id", "url", "steps", and "checks") are clearly visible and legible
+
+checks:
+  - id: field-labels-visible
+    question: Are the field labels ("id", "url", "steps", "checks") clearly visible with high contrast?
+    pass: The labels "id", "url", "steps", and "checks" are rendered in high-contrast white text above their descriptions, making them easy to read.
+    fail: The labels are completely invisible, blank, or extremely faint against the dark background.
+
+  - id: grid-layout-spaced
+    question: Is the supporting details grid properly spaced with readable column separation?
+    pass: The columns have generous horizontal separation (e.g. gap-6) so that the labels and descriptions are aligned and easy to read.
+    fail: The columns are squished together, overlapping, or too close due to a gap-0 or space-x negative margin layout.

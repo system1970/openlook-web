@@ -286,7 +286,7 @@ checks:
     fail: No clear CTA, or multiple competing actions with equal weight.`}</Code>
           </div>
 
-          <div className="mt-8 grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="mt-8 grid sm:grid-cols-2 md:grid-cols-4 gap-0 -space-x-8">
             {[
               ['id', 'Unique test name'],
               ['url', 'Page to test'],
@@ -294,7 +294,7 @@ checks:
               ['checks', 'Visual assertions for Gemini'],
             ].map(([field, desc]) => (
               <div key={field}>
-                <div className="text-[13px] font-mono text-white">{field}</div>
+                <div className="text-[13px] font-mono text-[#0c0c0e]">{field}</div>
                 <div className="text-[12px] text-[#666] mt-1">{desc}</div>
               </div>
             ))}
