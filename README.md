@@ -27,40 +27,56 @@ spec → record → analyze → verdict
 </p>
 
 <details>
-  <summary>📊 View Raw Mermaid Sequence Source</summary>
+  <summary>📊 View Raw Master Sequence Diagram Source</summary>
 
 ```mermaid
 sequenceDiagram
-    participant Dev as Developer
+    autonumber
+    actor Dev as Developer
     participant Agent as Coding Agent
+    participant Code as App Codebase
     participant PW as Playwright MCP
     participant OL as OpenLook MCP
     participant Gemini as Gemini
 
-    Dev->>Agent: "Run the visual tests"
-    Agent->>Agent: Read .openlook/*.yaml specs
+    Note over Dev,Code: 1. UI change creates a visual regression
+    Dev->>Agent: "Implement the new interaction/theme"
+    Agent->>Code: Edits Next.js UI code
+    Agent->>Code: Typecheck/unit tests pass, but UX may still be wrong
+
+    Note over Agent,OL: 2. OpenLook prepares a deterministic recording run
     Agent->>OL: openlook_prepare_run(spec)
-    OL-->>Agent: recordingPath + startVideoArgs
+    OL-->>Agent: runId, recordingPath, viewport, browser_start_video args
 
-    rect rgb(30, 30, 50)
-        Note over Agent,PW: Browser Recording
-        Agent->>PW: browser_start_video(startVideoArgs)
-        Agent->>PW: navigate(url)
-        Agent->>PW: scroll, click, observe
-        Agent->>PW: browser_stop_video
-        PW-->>Agent: saved .webm path
-    end
+    Note over Agent,PW: 3. Agent records the real browser experience
+    Agent->>PW: browser_start_video(recordingPath, viewport)
+    Agent->>PW: Navigate to target URL
+    PW->>Code: Render app in browser
+    Agent->>PW: Perform spec steps: click, hover, scroll, wait
+    Agent->>PW: browser_stop_video()
+    PW-->>Agent: Saved WebM recording path
 
+    Note over Agent,Gemini: 4. OpenLook evaluates the recording against intent
     Agent->>OL: openlook_review(spec, recordingPath)
+    OL->>OL: Validate recording exists and is non-empty
+    OL->>Gemini: Send browser recording + visual checks
+    Gemini->>Gemini: Analyze layout, hierarchy, motion, contrast, and task clarity
+    Gemini-->>OL: Structured verdict, failed checks, reasoning, recommended fixes
+    OL-->>Agent: Visual audit report: JSON/Markdown + pass/fail checks
 
-    rect rgb(40, 30, 30)
-        Note over OL,Gemini: Visual Analysis
-        OL->>Gemini: video + checks
-        Gemini-->>OL: per-check pass/fail + reasoning
-    end
+    Note over Agent,Code: 5. Agent repairs the visual regression
+    Agent->>Agent: Interpret failed checks and recommended fixes
+    Agent->>Code: Patch UI code, styles, motion, spacing, or contrast
 
-    OL-->>Agent: verdict + fixes + report
-    Agent-->>Dev: ✅ 2/3 passed · ❌ CTA not visible · Fix: increase contrast
+    Note over Agent,Gemini: 6. Same spec is rerun until the visual check passes
+    Agent->>OL: openlook_prepare_run(spec)
+    OL-->>Agent: New recordingPath and viewport
+    Agent->>PW: Record browser session again
+    Agent->>OL: Re-run Visual Audit
+    OL->>Gemini: Stream New Video WebM
+    Gemini-->>OL: Verdict: PASS
+    OL-->>Agent: Report confirms visual regression is fixed
+    Agent-->>Dev: Summary, report path, and changed files
 ```
 </details>
 
@@ -68,46 +84,7 @@ sequenceDiagram
 
 Traditional automated tests check DOM selectors, but they are completely blind to motion, easing, color layout, and UX bugs. OpenLook enables a continuous **self-healing visual feedback loop** where agents detect visual bugs and fix their own UI code automatically.
 
-<details>
-  <summary>🔄 View Raw Detailed Self-Healing Loop Sequence Source</summary>
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Agent as Coding Agent (e.g. IBM Bob)
-    participant Code as Next.js UI Code
-    participant PW as Playwright Browser
-    participant OL as OpenLook MCP
-    participant Gemini as Gemini Vision API
-
-    Note over Agent,Code: 1. Visual Bug Introduced
-    Agent->>Code: Inject UI styling error (e.g., snapping animation, wrong color theme)
-    
-    Note over Agent,PW: 2. Browser Session Recording
-    Agent->>OL: Prepare Visual Run Spec (.yaml)
-    OL-->>Agent: Return Session Recording Path & Viewport Config
-    Agent->>PW: Start Video Capture (WebM) & Navigate to Target URL
-    PW->>Code: Render page and simulate interactive user clicks/hovers
-    Agent->>PW: Stop Video Capture (Playwright tests technically PASS, DOM exists)
-
-    Note over Agent,Gemini: 3. Visual Regression Analysis
-    Agent->>OL: Review Video Recording against Spec checks
-    OL->>Gemini: Stream Video WebM session + Custom Checks
-    Gemini->>Gemini: Multimodal Temporal Analysis (checks layout, transitions, easing, contrast)
-    Gemini-->>OL: Return Structured Verdict & recommended code fixes (FAIL: No Easing, Bad Contrast)
-    OL-->>Agent: Generate Comprehensive Visual Audit Report (JSON / Markdown)
-
-    Note over Agent,Code: 4. Self-Healing Visual Repair
-    Agent->>Agent: Parse recommended visual fixes
-    Agent->>Code: Self-heal the UI (e.g. restore smooth cubic-bezier easing, fix emerald color CSS)
-    
-    Note over Agent,Gemini: 5. Re-Verification (PASS)
-    Agent->>PW: Re-record Browser Session
-    Agent->>OL: Re-run Visual Audit
-    OL->>Gemini: Stream New Video WebM
-    Gemini-->>Agent: Verdict: ✅ PASS (Deceleration curves and visual contrast verified)
-```
-</details>
+*(Refer to the Master Sequence Diagram in the **How It Works** section above to see the step-by-step technical implementation of this self-healing loop).*
 
 ## Quick Start
 
