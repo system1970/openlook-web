@@ -1,6 +1,6 @@
 {
   "name": "openlook",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Video-first visual UX testing MCP for coding agents",
   "type": "module",
   "bin": {

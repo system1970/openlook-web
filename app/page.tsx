@@ -452,7 +452,7 @@ checks:
           <span className="text-[13px] text-[#555]">OpenLook</span>
           <div className="flex items-center gap-6 text-[12px] text-[#444]">
             <a href="https://github.com/system1970/openlook-web" className="hover:text-white transition-colors">GitHub</a>
-            <a href="https://www.npmjs.com/package/openlook-mcp" className="hover:text-white transition-colors">npm</a>
+            <a href="https://www.npmjs.com/package/openlook" className="hover:text-white transition-colors">npm</a>
             <span>Built with IBM Bob</span>
           </div>
         </div>

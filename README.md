@@ -95,7 +95,7 @@ Traditional automated tests check DOM selectors, but they are completely blind t
 ### 1. Install the MCP server
 
 ```bash
-npx -y openlook-mcp
+npx -y openlook
 ```
 
 ### 2. Configure your agent
@@ -107,7 +107,7 @@ Add OpenLook and Playwright to your MCP config:
   "mcpServers": {
     "openlook": {
       "command": "npx",
-      "args": ["-y", "openlook-mcp"],
+      "args": ["-y", "openlook"],
       "env": {
         "GEMINI_API_KEY": "your_key_here"
       }
@@ -333,6 +333,6 @@ MIT
 
 **Agents should be able to see the interfaces they create.**
 
-[Install](https://www.npmjs.com/package/openlook-mcp) · [GitHub](https://github.com/system1970/openlook-web) · [Skill](https://github.com/system1970/openlook-web/tree/master/.agents/skills/openlook)
+[Install](https://www.npmjs.com/package/openlook) · [GitHub](https://github.com/system1970/openlook-web) · [Skill](https://github.com/system1970/openlook-web/tree/master/.agents/skills/openlook)
 
 </div>
