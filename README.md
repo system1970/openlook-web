@@ -25,19 +25,7 @@ The current branch should fail the verdict animation/style check because the ver
 Use this prompt in IBM Bob or another coding agent with MCP tools:
 
 ```text
-This branch intentionally contains a visual regression. Use the OpenLook skill and run the visual test in .openlook/hero-motion-graphic.yaml.
-
-Follow the OpenLook workflow exactly:
-1. Read and parse the spec.
-2. Call openlook_prepare_run with the parsed spec.
-3. Start Playwright recording using the returned startVideoArgs.
-4. Navigate to the spec URL and perform the spec steps.
-5. Stop recording with browser_stop_video.
-6. Call openlook_review with the same spec and recordingPath.
-7. Use the Gemini failure report to fix the UI.
-8. Rerun the same spec until it passes.
-
-Preserve the OpenLook report path and summarize the visual failure, the code fix, and the final pass result.
+Prepare run using the OpenLook skill.
 ```
 
 ## MCP Configuration
