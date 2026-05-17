@@ -1,69 +1,104 @@
 # OpenLook Workflow
 
-This skill uses a video-first UX test flow.
+Video-first visual unit testing with Playwright MCP + OpenLook MCP.
 
 ## Sequence
 
-1. User asks Bob to run an OpenLook spec.
-2. Bob loads the spec.
-3. Bob asks OpenLook MCP to validate and start/prepare the review.
-4. Bob uses Playwright MCP to run the browser flow.
-5. Bob records the browser session as video or captures frames throughout the run.
-6. Bob optionally captures supporting screenshots, DOM snapshots, logs, and observations.
-7. Bob attaches the video/frames and supporting evidence to OpenLook MCP.
-8. OpenLook MCP evaluates the run with Gemini Live.
-9. OpenLook MCP writes `report.json` and `report.md`.
-10. Bob summarizes what passed, what failed, and what to fix.
+```text
+1. Agent reads the OpenLook YAML spec.
+2. Agent calls openlook_prepare_run(spec).
+3. OpenLook creates .openlook/runs/<run-id>/ and returns recordingPath + startVideoArgs.
+4. Agent calls browser_start_video(startVideoArgs).
+5. Agent uses Playwright MCP to perform task.steps.
+6. Agent calls browser_stop_video and gets the saved .webm path.
+7. Agent calls openlook_review(spec, recordingPath).
+8. Gemini watches the browser recording and returns verdicts.
+9. Agent reports [x]/[ ] checks and recommended fixes.
+```
 
-## Expected tool sequence
+## Tool call reference
 
-Preferred video-first tool sequence:
+### Prepare run
 
-1. `openlook_validate_spec`
-2. `openlook_prepare_run`
-3. Playwright MCP: start video recording or prepare frame capture
-4. Playwright MCP: navigate to target URL
-5. Playwright MCP: click / type / scroll / wait / observe
-6. Playwright MCP: capture optional supporting evidence
-7. Playwright MCP: stop video recording or finalize frame capture
-8. `openlook_analyze_video_live`
-9. `openlook_finish_report`
-10. `openlook_get_report`
+```json
+openlook_prepare_run({
+  "spec": { "...full parsed spec object..." }
+})
+```
 
-If the current MCP server exposes older tool names, use this compatibility mapping:
+Returns:
 
-| Preferred workflow step                 | Older tool name         |
-| --------------------------------------- | ----------------------- |
-| validate/prepare spec                   | `openlook_load_spec`    |
-| attach video/frames/supporting evidence | `openlook_add_evidence` |
-| Gemini Live analysis                    | `openlook_analyze`      |
-| finish reports                          | `openlook_finish`       |
+```json
+{
+  "runId": "homepage-first-impression-...",
+  "runDir": "/absolute/path/.openlook/runs/homepage-first-impression-...",
+  "recordingPath": "/absolute/path/.openlook/runs/homepage-first-impression-.../recording.webm",
+  "startVideoArgs": {
+    "filename": "/absolute/path/.openlook/runs/homepage-first-impression-.../recording.webm",
+    "width": 1440,
+    "height": 900
+  }
+}
+```
 
-## Evidence priority
+### Start recording
 
-Primary evidence:
+```json
+browser_start_video({
+  "filename": "/absolute/path/.openlook/runs/<run-id>/recording.webm",
+  "width": 1440,
+  "height": 900
+})
+```
 
-- browser session video
-- captured browser video frames
+Call this before any navigation. Playwright MCP must be started with `--caps=devtools`.
 
-Supporting evidence:
+### Stop recording
 
-- screenshots
-- DOM snapshots
-- console logs
-- network logs
-- textual observations
+```json
+browser_stop_video()
+```
 
-Do not use screenshot-only analysis unless video or frame capture fails.
+If this returns a saved file path, pass that path to `openlook_review`. If it does not, use the `recordingPath` from `openlook_prepare_run`.
+
+### Send for analysis
+
+```json
+openlook_review({
+  "spec": { "...full parsed spec object..." },
+  "recordingPath": "/absolute/path/.openlook/runs/<run-id>/recording.webm",
+  "writeReport": true
+})
+```
+
+The only evidence is the browser recording. Do not send screenshot arrays, DOM snapshots, or notes unless the product explicitly adds a separate evidence mode later.
+
+## Response shape
+
+```json
+{
+  "verdict": "pass | fail | needs_review",
+  "confidence": 0.85,
+  "short_reason": "One-sentence summary",
+  "checks": [
+    {
+      "id": "check-id",
+      "status": "[x]",
+      "passed": true,
+      "reasoning": "What Gemini saw in the browser recording",
+      "fix": "Specific fix if failed"
+    }
+  ],
+  "recommended_fix": "Overall fix if verdict is fail",
+  "recordingPath": "/absolute/path/.openlook/runs/<run-id>/recording.webm",
+  "reportDir": "reports/<spec-id>-<timestamp>"
+}
+```
 
 ## Rerun loop
 
-When the report fails:
+```text
+fail -> read reasoning -> fix UI -> prepare a new run -> record again -> review again
+```
 
-1. Read failed checks.
-2. Inspect evidence references.
-3. Fix the UI/code.
-4. Rerun the same spec.
-5. Compare the new verdict with the previous report.
-
-Do not weaken the spec to pass the test.
+Never modify the spec to make it pass. The spec is the source of truth for user intent.

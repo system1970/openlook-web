@@ -1,182 +1,178 @@
 ---
 name: openlook
-description: Create, run, analyze, fix, and rerun OpenLook video-first visual UX tests using Playwright MCP, OpenLook MCP, and Gemini Live.
+description: Run OpenLook visual unit tests to verify UI quality from browser recordings. Use this skill whenever the user asks to visually test a page, check a UI, run a visual spec, create a visual test, review a UI change, or mentions OpenLook. Also use when the user says things like "does this look right", "check the homepage", "run the tests", "test the UI", or "visual review". Always use this skill when the user mentions visual unit tests, browser recording review, or evidence-based UX feedback.
 ---
 
-# OpenLook Bob Skill
+# OpenLook
 
-OpenLook is a video-first visual UX unit testing workflow.
+Visual unit testing for coding agents. Write a spec (steps + checks), record a browser session with Playwright, and Gemini evaluates the recording against your checks.
 
-A developer writes an OpenLook YAML spec describing the intended user experience. Bob uses Playwright MCP to run the browser flow. OpenLook MCP validates the spec, collects the recording or frames, evaluates the run with Gemini Live, and writes a local report.
+```
+spec → openlook_prepare_run → Playwright records .webm → openlook_review → Gemini watches → pass/fail
+```
 
-## Core rule
+Three systems, three jobs:
+- **You** (the agent): read the spec, orchestrate the run, perform the steps, report results.
+- **Playwright MCP**: drives the browser, records video. Does not evaluate.
+- **OpenLook MCP**: allocates recording paths, sends video to Gemini, returns verdicts. Does not drive the browser.
 
-The browser video or captured video frames are the primary evidence.
+## Spec format
 
-Screenshots, snapshots, console logs, network logs, and textual observations are supporting evidence only. Do not evaluate the UX from screenshots alone unless the user explicitly asks for a fallback review.
+Specs live in `.openlook/` in the project root. Each `.yaml` file is one visual unit test.
 
-## Main workflow
+```yaml
+id: homepage-first-impression
+url: http://localhost:3000
 
-When the user asks to create, run, analyze, fix, or rerun an OpenLook test:
+steps:
+  - Open the homepage
+  - Observe the first viewport without scrolling
+  - Scroll once to see supporting content
 
-1. Locate or create an OpenLook YAML spec under `openlook/`.
-2. Validate the spec with OpenLook MCP.
-3. Start or prepare an OpenLook review session/run.
-4. Use Playwright MCP to run the browser flow.
-5. Record the full browser session as video or capture video frames for the full run.
-6. Navigate to the spec target URL.
-7. Perform the UX flow according to:
-   - persona
-   - goal
-   - allowed_actions
-   - max_steps
-   - checks
-8. Capture screenshots, DOM snapshots, console logs, network logs, and observations only as optional supporting evidence.
-9. Attach evidence to the OpenLook review session.
-10. Ask OpenLook MCP to evaluate the spec against the recording or frames using Gemini Live.
-11. Ask OpenLook MCP to finish the report.
-12. Summarize the result for the user:
-    - verdict
-    - confidence
-    - failed checks
-    - evidence references
-    - recommended fixes
-    - report paths
-13. If the verdict is fail or needs_review, fix the app/code/spec issue and rerun the same spec.
+checks:
+  - id: value-prop-clear
+    question: Can the user understand the product value from the first viewport?
+    pass: The hero explains the product, who it is for, and why it matters.
+    fail: The hero is vague, generic, or does not explain the product.
 
-## Tool choreography
+  - id: primary-action-visible
+    question: Is the primary next action visually obvious?
+    pass: One visually dominant CTA is easy to find near the hero.
+    fail: No clear CTA, or multiple competing actions with equal weight.
+```
 
-Use the available OpenLook MCP tools. Prefer the newer video-first names if available:
+Fields:
+- `id` — unique test name
+- `url` — page to test
+- `viewport` — optional `{ width, height }`, defaults to 1440×900
+- `steps` — ordered browser actions you perform during recording
+- `checks` — visual assertions Gemini evaluates from the recording. Each check has `id`, `question`, `pass` criteria, `fail` criteria
 
-1. `openlook_validate_spec`
-2. `openlook_prepare_run`
-3. Playwright MCP browser navigation and interaction tools
-4. Playwright MCP video recording or frame capture tools
-5. `openlook_add_evidence` only for supporting evidence, if this tool exists
-6. `openlook_analyze_video_live` or the closest available OpenLook analyze tool
-7. `openlook_finish_report` or the closest available OpenLook finish tool
-8. `openlook_get_report`, if available
+Checks must be visually verifiable — Gemini can only judge what it sees in the video.
 
-If the current OpenLook MCP exposes older names, map them like this:
+## Writing a spec
 
-- `openlook_load_spec` = load/validate/start review
-- `openlook_add_evidence` = attach video, frames, screenshots, snapshots, logs, and observations
-- `openlook_analyze` = Gemini Live evaluation
-- `openlook_finish` = write final report
+When the user asks to create a visual test:
 
-But keep the mental model video-first.
+1. Ask for the URL, what to do (steps), and what to check (2–5 checks).
+2. Write the YAML spec using the exact format above.
+3. Save to `.openlook/<id>.yaml` in the project root. Create the `.openlook/` directory if it does not exist.
 
-## Playwright MCP behavior
+## Running a single spec
 
-Use Playwright MCP to:
+### 1. Read the spec
 
-- navigate to the target URL
-- click
-- type
-- scroll
-- wait
-- observe
-- capture screenshots/snapshots when useful
-- record browser video or provide captured frames when supported
+Read and parse the `.yaml` file. You need the full spec object for both `openlook_prepare_run` and `openlook_review`.
 
-Always make sure the run has complete visual evidence before analysis.
+### 2. Prepare the run
 
-If Playwright MCP supports explicit video recording tools:
+```
+openlook_prepare_run { "spec": { ...parsed spec... } }
+```
 
-- start video before navigation or immediately before the flow begins
-- stop video only after the goal/checks have been exercised
-- pass the final local video path to OpenLook MCP
+Save the returned `recordingPath` and `startVideoArgs`.
 
-If Playwright MCP does not expose a final video path:
+### 3. Start recording
 
-- capture frame evidence during the run
-- save frames under `reports/<test-id>/<run-id>/frames/`
-- attach those frames as the primary visual evidence for Gemini Live evaluation
-- clearly report that the run used frame-based video evidence rather than a single video file
+Call Playwright MCP **before** navigating anywhere:
 
-## Gemini Live evaluation rule
+```
+browser_start_video <startVideoArgs>
+```
 
-OpenLook uses Gemini Live for video analysis.
+### 4. Perform the steps
 
-The evaluation should include:
+Use Playwright MCP to execute each step from the spec:
+- Navigate to the spec URL.
+- Perform each step exactly as written (observe, scroll, click, type).
+- Add `browser_video_chapter` markers at key transitions ("Start", "After scroll", "Task complete").
 
-- normalized OpenLook spec
-- run context
-- browser recording or frames
-- supporting observations and artifacts
+### 5. Stop recording
 
-Gemini Live should return structured results:
+```
+browser_stop_video
+```
 
-- overall verdict: pass / fail / needs_review
-- confidence
-- check-by-check verdicts
-- reasoning
-- evidence timestamps or frame references
-- failed checks
-- recommended fixes
+If the response includes a saved file path, use that path for review. Otherwise use `recordingPath` from step 2.
 
-Do not call Gemini Live directly from Bob if OpenLook MCP already provides the analysis tool. Bob should normally use OpenLook MCP as the evaluation boundary.
+### 6. Review
 
-## OpenLook spec requirements
+```
+openlook_review { "spec": { ...same spec... }, "recordingPath": "<path>", "writeReport": true }
+```
 
-OpenLook specs should use version `0.1`.
+### 7. Report results
 
-Required top-level fields:
+Present results to the user using this exact format:
 
-- `version`
-- `test`
-- `target`
-- `persona`
-- `goal`
-- `run`
-- `checks`
-- `failure_conditions`
-- `evidence`
-- `verdict`
-- `metadata`
+```
+## OpenLook: <spec id>
 
-Use the template in `openlook-spec-v0.1-template.yml`.
+**Verdict: PASS** ✅  (or **FAIL** ❌ or **NEEDS REVIEW** ⚠️)
 
-## Reporting
+| # | Check | Status | Reasoning |
+|---|-------|--------|-----------|
+| 1 | value-prop-clear | ✅ | The hero headline clearly states... |
+| 2 | primary-action-visible | ❌ | No dominant CTA found above the fold... |
 
-The final run should produce local artifacts under:
+### Recommended Fix
+<fix from Gemini, if verdict is not pass>
 
-`reports/<test-id>/<run-id>/`
+📁 Report: <reportDir path>
+```
 
-Expected outputs:
+Always use the table format with the reasoning column. Always show the recommended fix when the test did not pass.
 
-- `report.json`
-- `report.md`
-- local video path or frame directory
-- normalized spec
-- evaluator metadata
-- check-by-check results
-- verdict
-- confidence
-- recommended fixes
-- evidence references
+## Running all specs
 
-## Safety rules
+When the user says "run the tests", "run openlook", or "run visual tests":
 
-- Do not commit videos by default.
-- Do not commit generated reports by default unless the user explicitly wants demo artifacts included.
-- Do not expose `GEMINI_API_KEY`.
-- Keep `.env` files out of git.
-- Keep artifacts under `reports/<test-id>/<run-id>/`.
-- Validate file paths before reading local artifacts.
-- Treat video/frame upload to Gemini Live as an explicit analysis step.
-- If the run may contain secrets, auth tokens, private data, or personal information, warn the user before analysis.
+1. Find all `.yaml` files in `.openlook/` in the project root.
+2. Run each spec sequentially using the single-spec flow above.
+3. After all specs complete, show a summary:
 
-## When fixing failures
+```
+## OpenLook Results
 
-When OpenLook reports a failure:
+| Spec | Verdict | Passed | Failed |
+|------|---------|--------|--------|
+| homepage-first-impression | ✅ PASS | 3/3 | 0 |
+| onboarding-flow | ❌ FAIL | 1/3 | 2 |
 
-1. Read `report.md` and `report.json`.
-2. Identify failed checks.
-3. Inspect the relevant UI/code.
-4. Make the smallest fix that satisfies the spec.
-5. Rerun the same OpenLook spec.
-6. Compare the new report with the previous one.
-7. Tell the user what changed.
+Overall: 1 passed, 1 failed out of 2 specs.
+```
 
-Do not change the spec just to make the test pass unless the spec is clearly wrong or the user asks you to update the intended UX.
+## Playwright MCP
+
+Playwright MCP must have video capabilities (`--caps=devtools`).
+
+| Tool | Purpose |
+|---|---|
+| `browser_start_video` | Start recording. Pass `startVideoArgs` from OpenLook. |
+| `browser_video_chapter` | Add chapter marker during recording. |
+| `browser_stop_video` | Stop recording and save the video file. |
+
+## Directory structure
+
+```
+<project-root>/
+  .openlook/                  ← specs (committed to git)
+    homepage.yaml
+    onboarding.yaml
+  reports/                    ← generated reports
+    homepage-first-impression-.../
+      report.json
+      report.md
+      recording.webm
+
+~/.openlook/<project-name>/   ← run recordings (not committed)
+  runs/
+    homepage-first-impression-.../
+      recording.webm
+```
+
+## Safety
+
+- Never log or expose `GEMINI_API_KEY`.
+- Do not commit `~/.openlook/`, `.webm` files, or `reports/` unless the user explicitly asks.
+- Warn before sending recordings that may contain credentials or personal data.

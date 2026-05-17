@@ -3,8 +3,10 @@ node_modules/
 
 # Build output
 dist/
-website/dist/
-website/node_modules/
+.next/
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
 
 # Environment variables
 .env
@@ -28,22 +30,30 @@ coverage/
 *.tmp
 *.temp
 
-# OpenLook evidence and sessions
-bob_sessions/
+# OpenLook run caches & temporary sessions (but commit the specs!)
+# Spec files (.openlook/*.yaml) must be committed to GitHub
+.openlook/runs/
+.openlook/*.webm
+.openlook/*.png
+
+# Playwright MCP state, temp snapshots, and console log traces
+.playwright-mcp/
+
+# Local visual test reports (ignore large generated media assets)
+reports/
+
+# Local media exclusions
 *.mp4
 *.webm
 *.mov
 *.avi
 
-# Reports (optional - uncomment to exclude)
-# reports/*.json
-# reports/*.md
-
-# Local-only skills (not for distribution)
-.agents/skills/context7-mcp/
-.agents/skills/mcp-builder/
+# Local-only helper skills (but commit the official openlook skill!)
+.agents/skills/*
+!.agents/skills/openlook/
 
 # Vercel
 .vercel
 
 # Made with Bob
+.bob/

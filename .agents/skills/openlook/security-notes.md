@@ -25,11 +25,8 @@ When configuring OpenLook MCP in Bob's settings:
 {
   "mcpServers": {
     "openlook": {
-      "command": "bun",
-      "args": ["run", "/absolute/path/to/openlook-web/src/index.ts"],
-      "env": {
-        "GEMINI_API_KEY": "your_actual_key_here"
-      }
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp"
     }
   }
 }
@@ -171,7 +168,7 @@ OpenLook does not transmit evidence to external services except:
 
 OpenLook uses:
 
-- `@google/generative-ai` - Official Google SDK
+- `@google/genai` - Official Google GenAI SDK
 - `@modelcontextprotocol/sdk` - Official MCP SDK
 - `zod` - Schema validation
 - `yaml` - YAML parsing
@@ -179,7 +176,6 @@ OpenLook uses:
 **Security practices:**
 
 - Pin dependency versions in `package.json`
-- Run `bun audit` regularly
 - Review dependency updates before upgrading
 - Use `bun install --frozen-lockfile` in CI/CD
 

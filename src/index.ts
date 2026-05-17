@@ -1,28 +1,25 @@
 #!/usr/bin/env node
 
-/**
- * OpenLook - Visual Unit Testing for User Experience
- * Entry point - routes to CLI or MCP mode
- */
+import * as path from 'node:path';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { OpenLookMcpServer } from './lib/mcp-server.js';
 
-import { runCLI } from './cli.js';
-import { startMcpServer } from './mcp-server.js';
-
-// Check if running as CLI (has command-line arguments)
-const args = process.argv.slice(2);
-
-if (args.length > 0) {
-  // CLI mode - run visual test
-  runCLI(args).catch(error => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
-} else {
-  // MCP mode - start MCP server on stdio
-  startMcpServer().catch(error => {
-    console.error('MCP server error:', error);
-    process.exit(1);
-  });
+// Load .env file if process.loadEnvFile is supported (Node.js >= 20.6.0)
+if (typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile(path.resolve(process.cwd(), '.env'));
+  } catch {
+    // Ignore error if file doesn't exist or fail to load
+  }
 }
 
-// Made with Bob
+async function main() {
+  const server = new OpenLookMcpServer();
+  await server.connect(new StdioServerTransport());
+}
+
+main().catch(error => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});
+

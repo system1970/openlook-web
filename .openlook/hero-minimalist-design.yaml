@@ -1,0 +1,26 @@
+id: homepage-hero-minimalist
+url: http://localhost:3000
+
+viewport:
+  width: 1440
+  height: 900
+
+steps:
+  - Navigate to the homepage
+  - Observe the hero section without scrolling
+
+checks:
+  - id: hero-minimalist-aesthetic
+    question: Is the hero clean, centered, and minimalist with a plain dark backdrop?
+    pass: The hero has a pure dark, matte background with a clean, centered headline, a description, and elegant CTA buttons. There are no distracting or cluttered elements.
+    fail: The background is cluttered, noisy, or contains visually competing elements.
+
+  - id: centered-typography-legible
+    question: Is the centered typography perfectly readable with excellent contrast?
+    pass: The white headline and muted description are centered and stand out with maximum contrast against the pure dark background.
+    fail: The text is hard to read, has low contrast, or is cut off.
+
+  - id: primary-action-dominant
+    question: Is the primary "Get started" CTA visually distinct and dominant?
+    pass: The primary "Get started" button has a high-contrast white fill with black text, making it stand out as the dominant next action next to the secondary outline button.
+    fail: No dominant button, or both buttons share the same low-contrast outline styling.

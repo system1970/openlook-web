@@ -1,89 +1,39 @@
-version: "0.1"
-
-test:
-  id: "example-ux-test"
-  name: "Example UX Test"
-  description: "Describe the intended user experience being tested."
+id: "homepage-first-impression"
+name: "Homepage First Impression"
+description: "A small visual unit test for a single page and user intent."
 
 target:
-  url: "http://localhost:3000"
+  url: "http://localhost:5173"
   viewport:
-    width: 1280
-    height: 720
-  device: "desktop"
+    width: 1440
+    height: 900
 
 persona:
-  name: "First-time user"
-  role: "User evaluating the product"
-  context: "The user is visiting the product for the first time and wants to understand what to do next."
-  knowledge_level: "novice"
-  patience: "medium"
+  role: "developer"
+  context: "Visiting the product for the first time and deciding whether it is worth trying."
 
-goal:
-  statement: "The user should be able to understand the page and complete the intended action."
-  success_signal: "The intended action is visibly completed or the user reaches a clear success state."
-  max_time_seconds: 90
-
-run:
-  mode: "bob_playwright_mcp"
-  max_steps: 25
-  allowed_actions:
-    - "navigate"
-    - "click"
-    - "type"
-    - "scroll"
-    - "wait"
-    - "observe"
+task:
+  goal: "Understand what the product does and decide what to do next."
+  steps:
+    - "Open the target page."
+    - "Look at the first viewport."
+    - "Scroll once to understand the workflow or supporting proof."
 
 checks:
-  - id: "primary-action-visible"
-    type: "visual"
-    instruction: "Verify that the main call-to-action is visible without confusion."
-    pass_if: "A user can clearly identify the primary action from the recorded browser session."
-    fail_if: "The primary action is hidden, visually weak, mislabeled, or ambiguous."
-    severity: "critical"
+  - id: "value-prop-clear"
+    question: "Can the user understand the product value from the first viewport?"
+    pass: "The hero clearly explains the product, who it is for, and why it matters."
+    fail: "The hero is vague, generic, hidden, or does not explain the product value."
 
-  - id: "flow-completes"
-    type: "flow"
-    instruction: "Verify that the user can complete the main goal."
-    pass_if: "The recording shows the user reaching a clear success or completion state."
-    fail_if: "The user gets stuck, loops, encounters an error, or no clear completion state appears."
-    severity: "critical"
+  - id: "primary-action-clear"
+    question: "Is the next action visually obvious?"
+    pass: "There is one visually dominant primary action near the hero."
+    fail: "There are competing actions, weak contrast, or no clear next step."
 
-  - id: "feedback-clear"
-    type: "interaction"
-    instruction: "Verify that the UI gives clear feedback after user actions."
-    pass_if: "Important clicks, form submissions, or state changes produce visible feedback."
-    fail_if: "The UI appears frozen, silent, misleading, or unclear after important actions."
-    severity: "major"
-
-failure_conditions:
-  - "The page fails to load."
-  - "The user cannot identify the next action."
-  - "The flow ends with an unhandled error."
-  - "The recording or frames are insufficient to evaluate the experience."
-
-evidence:
-  required:
-    - "video_or_frames"
-  optional:
-    - "screenshots"
-    - "dom_snapshots"
-    - "console_logs"
-    - "network_logs"
-    - "observations"
-  capture_policy: "video_first"
+  - id: "design-polished"
+    question: "Does the page feel polished and product-led?"
+    pass: "The page uses a clean visual system, restrained typography, strong spacing, and concrete product artifacts."
+    fail: "The page feels unfinished, cluttered, generic, or visually inconsistent."
 
 verdict:
-  pass_policy: "all_critical_checks_pass"
-  allow_needs_review: true
-
-metadata:
-  owner: ""
-  tags:
-    - "ux"
-    - "visual"
-    - "openlook"
-  notes: ""
-
-# Made with Bob
+  pass_if: "all checks pass"

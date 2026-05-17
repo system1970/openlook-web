@@ -1,253 +1,357 @@
 # OpenLook
 
-**Visual Unit Testing for User Experience**
+<p align="center">
+  <img src="https://raw.githubusercontent.com/system1970/openlook-web/master/public/banner.png" alt="OpenLook Banner" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
+</p>
 
-Test your UX like you test your code - with assertions, evidence, and clear pass/fail verdicts.
+**What if your coding agent could see?**
 
-## Hackathon Context
+AI agents write UI code every day. They can run tests, check types, and lint — but they have never been able to *look* at what they built. A button that technically renders can still be invisible. A page that passes every unit test can still confuse every user.
 
-This project is being developed for the [IBM Bob Hackathon](https://lablab.ai/ai-hackathons/ibm-bob-hackathon).
+OpenLook gives coding agents vision. Write a visual test spec. The agent records its own browser session. Gemini watches the recording and judges whether the experience actually works — then tells the agent exactly what to fix.
 
-## What is OpenLook?
+It's unit testing for UX, built for the age of AI.
 
-OpenLook is a visual unit testing framework that brings the rigor of code testing to user experience. Instead of writing code assertions, you write **visual assertions** in YAML specs that describe what a user should see and experience.
+<div align="center">
 
-### The Vision
-
-Traditional QA testing is either:
-- **Manual**: Slow, inconsistent, hard to scale
-- **Code-based**: Brittle selectors, misses visual issues, requires programming
-
-OpenLook bridges this gap with **declarative visual tests**:
-
-```yaml
-persona: new_user
-target:
-  url: https://myapp.com/onboarding
-checks:
-  - type: visual_presence
-    description: "Welcome message is visible and friendly"
-    expected: "Clear welcome text for first-time users"
-  - type: visual_flow
-    description: "Next steps are obvious"
-    expected: "Prominent call-to-action button"
+```
+spec → record → analyze → verdict
 ```
 
-### How It Works
+</div>
 
-1. **Write a spec** - Describe the user persona, target page, and visual checks in YAML
-2. **Run OpenLook** - AI-powered visual reasoning evaluates your UX
-3. **Get a report** - Clear pass/fail with screenshots and actionable feedback
+## How It Works
 
-**Current Status**: 🚧 Foundation phase - spec parser and report writer only
+<p align="center">
+  <img src="https://raw.githubusercontent.com/system1970/openlook-web/master/public/sequence_diagram.png" alt="OpenLook Visual Flow Diagram" width="100%" style="border-radius: 12px; border: 1px solid #1a1a1a;">
+</p>
+
+<details>
+  <summary>📊 View Raw Mermaid Sequence Source</summary>
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant Agent as Coding Agent
+    participant PW as Playwright MCP
+    participant OL as OpenLook MCP
+    participant Gemini as Gemini
+
+    Dev->>Agent: "Run the visual tests"
+    Agent->>Agent: Read .openlook/*.yaml specs
+    Agent->>OL: openlook_prepare_run(spec)
+    OL-->>Agent: recordingPath + startVideoArgs
+
+    rect rgb(30, 30, 50)
+        Note over Agent,PW: Browser Recording
+        Agent->>PW: browser_start_video(startVideoArgs)
+        Agent->>PW: navigate(url)
+        Agent->>PW: scroll, click, observe
+        Agent->>PW: browser_stop_video
+        PW-->>Agent: saved .webm path
+    end
+
+    Agent->>OL: openlook_review(spec, recordingPath)
+
+    rect rgb(40, 30, 30)
+        Note over OL,Gemini: Visual Analysis
+        OL->>Gemini: video + checks
+        Gemini-->>OL: per-check pass/fail + reasoning
+    end
+
+    OL-->>Agent: verdict + fixes + report
+    Agent-->>Dev: ✅ 2/3 passed · ❌ CTA not visible · Fix: increase contrast
+```
+</details>
+
+## The Video Self-Healing Loop
+
+Traditional automated tests check DOM selectors, but they are completely blind to motion, easing, color layout, and UX bugs. OpenLook enables a continuous **self-healing visual feedback loop** where agents detect visual bugs and fix their own UI code automatically.
+
+<details>
+  <summary>🔄 View Raw Detailed Self-Healing Loop Sequence Source</summary>
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Agent as Coding Agent (e.g. IBM Bob)
+    participant Code as Next.js UI Code
+    participant PW as Playwright Browser
+    participant OL as OpenLook MCP
+    participant Gemini as Gemini Vision API
+
+    Note over Agent,Code: 1. Visual Bug Introduced
+    Agent->>Code: Inject UI styling error (e.g., snapping animation, wrong color theme)
+    
+    Note over Agent,PW: 2. Browser Session Recording
+    Agent->>OL: Prepare Visual Run Spec (.yaml)
+    OL-->>Agent: Return Session Recording Path & Viewport Config
+    Agent->>PW: Start Video Capture (WebM) & Navigate to Target URL
+    PW->>Code: Render page and simulate interactive user clicks/hovers
+    Agent->>PW: Stop Video Capture (Playwright tests technically PASS, DOM exists)
+
+    Note over Agent,Gemini: 3. Visual Regression Analysis
+    Agent->>OL: Review Video Recording against Spec checks
+    OL->>Gemini: Stream Video WebM session + Custom Checks
+    Gemini->>Gemini: Multimodal Temporal Analysis (checks layout, transitions, easing, contrast)
+    Gemini-->>OL: Return Structured Verdict & recommended code fixes (FAIL: No Easing, Bad Contrast)
+    OL-->>Agent: Generate Comprehensive Visual Audit Report (JSON / Markdown)
+
+    Note over Agent,Code: 4. Self-Healing Visual Repair
+    Agent->>Agent: Parse recommended visual fixes
+    Agent->>Code: Self-heal the UI (e.g. restore smooth cubic-bezier easing, fix emerald color CSS)
+    
+    Note over Agent,Gemini: 5. Re-Verification (PASS)
+    Agent->>PW: Re-record Browser Session
+    Agent->>OL: Re-run Visual Audit
+    OL->>Gemini: Stream New Video WebM
+    Gemini-->>Agent: Verdict: ✅ PASS (Deceleration curves and visual contrast verified)
+```
+</details>
 
 ## Quick Start
 
-### Prerequisites
-
-- [Bun](https://bun.sh/) >= 1.0
-- Node.js >= 18 (for running built output)
-- Google Gemini API key (for future AI integration)
-
-### Installation
+### 1. Install the MCP server
 
 ```bash
-# Install dependencies
-bun install
-
-# Copy environment template
-cp .env.example .env
-
-# Add your Gemini API key to .env (for future use)
-# Get key from: https://aistudio.google.com/app/apikey
+npx -y openlook-mcp
 ```
 
-### Usage
+### 2. Configure your agent
 
-```bash
-# Run a visual test spec
-bun run openlook examples/openlook.first-run.yaml
-
-# Or after building
-bun run build
-./dist/index.js examples/openlook.first-run.yaml
-```
-
-## Spec Format
-
-OpenLook specs are YAML files that describe visual unit tests:
-
-```yaml
-id: homepage-hero-check
-persona:
-  type: new_user
-  context: "First visit to the site"
-
-target:
-  url: https://example.com
-  
-run_config:
-  viewport:
-    width: 1920
-    height: 1080
-  device: desktop
-
-checks:
-  - type: visual_presence
-    selector: ".hero-section"
-    description: "Hero section is prominent"
-    expected: "Large hero image with clear value proposition"
-    
-  - type: visual_hierarchy
-    description: "Call-to-action stands out"
-    expected: "Primary CTA button is visually dominant"
-
-evidence:
-  screenshots: true
-  full_page: true
-```
-
-See `examples/openlook.first-run.yaml` for a complete example.
-
-## Using with IBM Bob
-
-OpenLook works as an MCP server alongside Playwright MCP in IBM Bob for interactive visual testing.
-
-### Bob MCP Configuration
-
-Add both MCPs to your Bob configuration file:
+Add OpenLook and Playwright to your MCP config:
 
 ```json
 {
   "mcpServers": {
     "openlook": {
-      "command": "node",
-      "args": ["C:/path/to/openlook/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "openlook-mcp"],
       "env": {
         "GEMINI_API_KEY": "your_key_here"
       }
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-playwright"]
+      "args": ["-y", "@playwright/mcp@latest", "--caps=devtools"]
     }
   }
 }
 ```
 
-**Note:** Replace `C:/path/to/openlook/dist/index.js` with the actual path to your OpenLook installation.
+> `--caps=devtools` enables video recording in Playwright MCP.
 
-### Workflow with Bob
+### 3. Write a visual test
 
-1. **Load a spec**: Use `openlook_load_spec` to start a visual test session
-2. **Navigate & capture**: Use Playwright MCP tools (`playwright_navigate`, `playwright_screenshot`) to interact with the page
-3. **Add evidence**: Use `openlook_add_evidence` to attach screenshots and observations
-4. **Analyze**: Use `openlook_analyze` for AI-powered evaluation of all checks
-5. **Generate report**: Use `openlook_finish` to create JSON and Markdown reports
+Create `.openlook/homepage.yaml` in your project:
 
-### Example Bob Conversation
+```yaml
+id: homepage-first-impression
+url: http://localhost:3000
+
+steps:
+  - Open the homepage
+  - Observe the first viewport without scrolling
+  - Scroll once to see supporting content
+
+checks:
+  - id: value-prop-clear
+    question: Can the user understand the product value from the first viewport?
+    pass: The hero explains the product, who it is for, and why it matters.
+    fail: The hero is vague, generic, or does not explain the product.
+
+  - id: primary-action-visible
+    question: Is the primary next action visually obvious?
+    pass: One visually dominant CTA is easy to find near the hero.
+    fail: No clear CTA, or multiple competing actions with equal weight.
+```
+
+### 4. Run it
+
+Tell your agent: **"Run the visual tests"**
+
+The agent reads the spec, records the browser session, sends the recording to Gemini, and reports back:
 
 ```
-You: Load the spec examples/openlook.first-run.yaml
+## OpenLook: homepage-first-impression
 
-Bob: [Uses openlook_load_spec]
-     Session created! Target: https://example.com
-     Recommended: Navigate to URL and capture screenshot
+Verdict: FAIL ❌
 
-You: Navigate to the URL and take a screenshot
+| # | Check              | Status | Reasoning                                  |
+|---|--------------------|--------|--------------------------------------------|
+| 1 | value-prop-clear   | ✅     | Hero clearly explains the product value    |
+| 2 | primary-action-visible | ❌ | Two buttons compete — no dominant CTA      |
 
-Bob: [Uses playwright_navigate and playwright_screenshot]
-     Screenshot saved to screenshots/page-1.png
-     
-Bob: [Uses openlook_add_evidence]
-     Evidence added. Ready for analysis.
-
-You: Analyze the evidence
-
-Bob: [Uses openlook_analyze]
-     Verdict: PASS (confidence: 0.85)
-     All 3 checks passed!
-
-You: Generate the final report
-
-Bob: [Uses openlook_finish]
-     Report saved to reports/homepage-first-impression-2026-05-15/
+### Recommended Fix
+Increase the contrast and size of the primary CTA. Remove or visually demote the secondary action.
 ```
+
+Fix the UI. Rerun the same spec. The test passes. Ship it.
+
+## Why OpenLook?
+
+Traditional testing asks: *does this component render?*
+
+OpenLook asks: *does this experience work?*
+
+| | Unit Tests | E2E Tests | **OpenLook** |
+|---|---|---|---|
+| **Tests** | Functions, logic | User flows, DOM state | Visual experience |
+| **Judges** | Assert library | Playwright selectors | Gemini watching video |
+| **Catches** | Logic bugs | Flow breakages | UX problems |
+| **Written by** | Developer | Developer | Developer or agent |
+| **Runs on** | Code | Browser DOM | Browser recording |
+
+Problems OpenLook catches that traditional tests miss:
+- The CTA exists but is visually invisible
+- The page renders but is overwhelming
+- The form works but the user can't figure out what to do
+- The layout is technically correct but feels broken
+
+## Spec Format
+
+Every spec is a YAML file with three things: **where to go**, **what to do**, and **what to check**.
+
+```yaml
+id: onboarding-flow
+url: http://localhost:3000/onboarding
+
+steps:
+  - Navigate to the onboarding page
+  - Fill in the name field with "Jane"
+  - Click the Continue button
+  - Observe the next screen
+
+checks:
+  - id: progress-clear
+    question: Does the user know where they are in the onboarding flow?
+    pass: A progress indicator shows the current step and remaining steps.
+    fail: No progress indicator, or the user cannot tell how far along they are.
+```
+
+**Fields:**
+- `id` — test name
+- `url` — page to test
+- `viewport` — optional `{ width, height }`, defaults to 1440×900
+- `steps` — browser actions the agent performs during recording
+- `checks` — visual assertions Gemini evaluates from the recording
 
 ## Architecture
 
-OpenLook has three modes:
+OpenLook is an MCP server that sits alongside Playwright MCP. Three systems, three jobs:
 
-### 1. CLI Mode
-Run visual tests from the command line:
-```bash
-openlook path/to/spec.yaml
+```mermaid
+graph LR
+    A[Your Agent] -->|drives browser| B[Playwright MCP]
+    A -->|prepares runs & reviews| C[OpenLook MCP]
+    C -->|sends video| D[Gemini]
+    D -->|returns verdicts| C
+    B -->|records .webm| E[Recording]
+    E -->|analyzed by| C
+
+    style A fill:#1e40af,stroke:#3b82f6,color:#fff
+    style B fill:#4338ca,stroke:#818cf8,color:#fff
+    style C fill:#065f46,stroke:#34d399,color:#fff
+    style D fill:#92400e,stroke:#fbbf24,color:#fff
+    style E fill:#374151,stroke:#9ca3af,color:#fff
 ```
 
-### 2. MCP Server Mode ✅
-Integrate with AI assistants like IBM Bob for interactive testing.
+| System | Does | Does Not |
+|---|---|---|
+| **Your agent** | Reads specs, performs steps, reports results | Evaluate UI quality |
+| **Playwright MCP** | Drives browser, records video | Analyze recordings |
+| **OpenLook MCP** | Allocates paths, sends to Gemini, returns verdicts | Drive the browser |
 
-### 3. CI/CD Mode (Future)
-Run visual tests in your deployment pipeline.
+## MCP Tools
+
+### `openlook_prepare_run`
+
+Prepares a recording directory and returns the exact arguments for Playwright's `browser_start_video`.
+
+**Input:** `{ spec }` — the parsed YAML spec object.
+
+**Returns:** `runId`, `recordingPath`, `startVideoArgs` (pass directly to `browser_start_video`), and `reviewArgs` (pass directly to `openlook_review` after recording).
+
+### `openlook_review`
+
+Sends a browser recording to Gemini for visual evaluation against the spec's checks.
+
+**Input:** `{ spec, recordingPath, writeReport? }` — the spec, path to `.webm`, and whether to write `report.md`/`report.json`.
+
+**Returns:** `verdict` (pass/fail/needs_review), per-check results with `✅`/`❌` status, reasoning, and recommended fixes. If `writeReport: true`, also returns the `reportDir` path.
 
 ## Project Structure
 
 ```
-openlook/
-├── src/
-│   ├── index.ts          # Entry point (CLI/MCP router)
-│   ├── cli.ts            # CLI runner
-│   ├── mcp-server.ts     # MCP server with 4 tools ✅
-│   ├── review-session.ts # Session management ✅
-│   ├── gemini.ts         # Gemini AI integration ✅
-│   ├── spec.ts           # YAML spec parser with validation
-│   ├── report.ts         # Report generator (JSON + Markdown)
-│   ├── types.ts          # TypeScript types and Zod schemas
-│   ├── browser.ts        # Browser controller (future)
-│   ├── evaluator.ts      # AI evaluator (future)
-│   └── session.ts        # Session manager (future)
-├── examples/
-│   └── openlook.first-run.yaml  # Example spec
-├── reports/              # Generated test reports
-└── docs/
-    └── notes.md          # Technical references
+your-project/
+  .openlook/              ← visual test specs (committed)
+    homepage.yaml
+    onboarding.yaml
+  reports/                ← generated reports
+    homepage-2026-.../
+      report.md
+      report.json
+      recording.webm
+
+~/.openlook/<project>/    ← run recordings (not committed)
+  runs/
+    homepage-2026-.../
+      recording.webm
 ```
 
-## Development Status
+## OpenLook Skill
 
-### Completed ✅
-- Project renamed to OpenLook
-- YAML spec format defined
-- Spec parser with Zod validation
-- Report generator (JSON + Markdown)
-- CLI runner with mock data
-- Example spec file
-- **MCP server mode with 4 tools**
-- **Gemini AI integration**
-- **Session management**
+OpenLook includes a skill file that teaches coding agents the full workflow — how to read specs, drive the browser, and format results. Install the skill into your agent's skill directory:
 
-### Not Yet Implemented ⏳
-- Real browser automation (handled by Playwright MCP)
-- Video recording and Gemini Live
-- CI/CD integration
-- Hosted dashboard
+```
+.agents/skills/openlook/SKILL.md
+```
 
-## Why "OpenLook"?
+The skill handles:
+- Creating new visual test specs from user requests
+- Running single specs or all specs in `.openlook/`
+- Formatting results as markdown tables with reasoning and fixes
 
-- **Open**: Open source, open format, open to all skill levels
-- **Look**: Visual-first testing - what users actually see
-- **Unit Testing**: Bring the discipline of unit tests to UX
+## Development
 
-## Documentation
+```bash
+# Install dependencies
+bun install
 
-- [Example Spec](examples/openlook.first-run.yaml) - See the spec format in action
-- [Technical Notes](docs/notes.md) - Implementation references
-- [Bob Sessions](bob_sessions/README.md) - Hackathon development evidence
+# Build the MCP server
+bun run build:mcp
 
-## Contributing
+# Run locally (stdio mode)
+node dist/src/index.js
 
-This is a hackathon project, but contributions are welcome! The foundation is in place - help us build the future of visual UX testing.
+# Run the website
+bun run dev
+```
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `GEMINI_API_KEY` | Yes | Google Gemini API key for video analysis |
+| `GEMINI_MODEL` | No | Model override (default: `gemini-2.5-flash`) |
+
+## Built With
+
+- [IBM Bob](https://www.ibm.com/bob) — AI coding agent used to build this project
+- [Google Gemini](https://ai.google.dev/) — multimodal AI for video analysis
+- [Playwright MCP](https://github.com/nichochar/playwright-mcp) — browser automation and recording
+- [Model Context Protocol](https://modelcontextprotocol.io/) — the standard connecting AI to tools
 
 ## License
 
 MIT
+
+---
+
+<div align="center">
+
+**Agents should be able to see the interfaces they create.**
+
+[Install](https://www.npmjs.com/package/openlook-mcp) · [GitHub](https://github.com/system1970/openlook-web) · [Skill](https://github.com/system1970/openlook-web/tree/master/.agents/skills/openlook)
+
+</div>
